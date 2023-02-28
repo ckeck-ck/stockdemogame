@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Chart from 'chart.js/auto';
+import React, { useState, useEffect } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-// import designs
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
+// import designs based on mui
 import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
-
-
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
 
 const initialData = [
     { name: '5', bidPrice: 100, askPrice: 99 },
@@ -20,7 +19,7 @@ const initialData = [
 ];
 
 const getRandomPrice = (basePrice) => {
-    const change = (Math.random() * 0.05 + 0.01) * (Math.random() < 0.5 ? -1 : 1);
+    const change = (Math.random() * 0.1 + 0.01) * (Math.random() < 0.5 ? -1 : 1);
     const newPrice = basePrice + change;
     return Math.max(0.1, newPrice);
 };
@@ -28,23 +27,23 @@ const getRandomPrice = (basePrice) => {
 const getRandomData = (initialData, bearish, bullish) => {
     let newBidPrice = initialData[initialData.length - 1].bidPrice;
     let newAskPrice = initialData[initialData.length - 1].askPrice;
-    let newBearish = bearish;
-    let newBullish = bullish;
+
+    const newBearish = bearish > 0 ? bearish - 1 : Math.random() < 0.6 ? 2 : 0; // changed the probability to 0.6
+    const newBullish = bullish > 0 ? bullish - 1 : Math.random() < 0.6 ? 2 : 0; // changed the probability to 0.6
 
     const newData = initialData.map((entry, index) => {
         if (index > 0) {
             if (newBearish > 0) {
                 newBidPrice = getRandomPrice(newBidPrice);
-                newBearish--;
             } else if (newBullish > 0) {
                 newAskPrice = getRandomPrice(newAskPrice);
-                newBullish--;
             } else {
+                const offset = (Math.random() * 0.05) * (Math.random() < 0.5 ? -1 : 1);
                 if (Math.random() < 0.5) {
-                    newBidPrice = getRandomPrice(newBidPrice);
+                    newBidPrice = getRandomPrice(newBidPrice + offset);
                     newBearish = 2;
                 } else {
-                    newAskPrice = getRandomPrice(newAskPrice);
+                    newAskPrice = getRandomPrice(newAskPrice - offset);
                     newBullish = 2;
                 }
             }
@@ -75,79 +74,24 @@ const Dashboard = () => {
     const [bearish, setBearish] = useState(0);
     const [bullish, setBullish] = useState(0);
     const [gameRunning, setGameRunning] = useState(false);
-
-    const canvasRef = useRef(null);
-
+    const [currentBid, setCurrentBid] = useState(initialData[0].bidPrice);
+    const [currentAsk, setCurrentAsk] = useState(initialData[0].askPrice);
 
     useEffect(() => {
-        if (canvasRef.current) {
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
-
-            const chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.map((entry) => entry.name),
-                    datasets: [
-                        {
-                            label: 'Bid Price',
-                            data: data.map((entry) => entry.bidPrice),
-                            backgroundColor: 'rgba(0, 150, 136, 0.2)',
-                            borderColor: 'rgba(0, 150, 136, 1)',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                        },
-                        {
-                            label: 'Ask Price',
-                            data: data.map((entry) => entry.askPrice),
-                            backgroundColor: 'rgba(255, 193, 7, 0.2)',
-                            borderColor: 'rgba(255, 193, 7, 1)',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    animation: {
-                        duration: 5000,
-                        easing: "linear"
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                autoSkip: true,
-                                maxTicksLimit: 10,
-                                maxRotation: 0,
-                                minRotation: 0,
-                            },
-                        },
-                    },
-                },
-            });
-
-            const intervalId = setInterval(() => {
+        let intervalId
+        if (gameRunning) {
+            intervalId = setInterval(() => {
                 const { newData, newBearish, newBullish } = getRandomData(data, bearish, bullish);
                 setData(newData);
                 setBearish(newBearish);
                 setBullish(newBullish);
+                setCurrentBid(newData[newData.length - 1].bidPrice);
+                setCurrentAsk(newData[newData.length - 1].askPrice);
 
-                chart.data.labels = newData.map((entry) => entry.name);
-                chart.data.datasets[0].data = newData.map((entry) => entry.bidPrice);
-                chart.data.datasets[1].data = newData.map((entry) => entry.askPrice);
-
-                chart.update();
             }, 1000);
-
-            return () => {
-                clearInterval(intervalId);
-                chart.destroy();
-            };
         }
-    }, [canvasRef, data, bearish, bullish]);
-
-
+        return () => clearInterval(intervalId);
+    }, [data, bearish, bullish, gameRunning]);
 
     const buyStocks = (numShares) => {
         const orderValue = numShares * data[0].bidPrice;
@@ -165,6 +109,26 @@ const Dashboard = () => {
         setCommission(commission + Number(getCommission(orderValue)));
     };
 
+    const sellButton = shares > 0 ? (
+        <Button variant="contained" color="primary" sx={{ ml: 2 }} onClick={() => sellStocks(10)} disabled={shares <= 0}>
+            Sell 10 shares for {data[0].askPrice.toFixed(2)} € each
+        </Button>
+    ) : null;
+
+
+    // function to display the current market situation
+    const marketSituation = () => {
+        if (bearish > 0 && bullish > 0) {
+            return 'Neutral';
+        } else if (bearish > 0) {
+            return 'Bearish';
+        } else if (bullish > 0) {
+            return 'Bullish';
+        } else {
+            return '';
+        }
+    }
+
     const startGame = () => {
         setData(initialData);
         setBalance(50000);
@@ -178,6 +142,7 @@ const Dashboard = () => {
     const endGame = () => {
         const profitLoss = (shares * data[0].askPrice - commission - 50000).toFixed(2);
         alert(`Game over! Your profit/loss: ${profitLoss} €`);
+        setGameRunning(false);
     };
 
     return (
@@ -186,37 +151,52 @@ const Dashboard = () => {
                 <Typography variant="h4" align="center" gutterBottom>
                     Mustermann AG Stock Price
                 </Typography>
-                <canvas id="stockChart" ref={canvasRef} width="800" height="400" style={{ border: '1px solid black' }} />
+                <ResponsiveContainer width="100%" height={400}>
+                    <LineChart data={data}>
+                        <XAxis dataKey="name" domain={['dataMin', 'dataMax']} />
+                        <YAxis />
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="bidPrice" stroke="#00a152" connectNulls activeDot={{ r: 8 }} />
+                        <Line type="monotone" dataKey="askPrice" stroke="#ffbe3d" connectNulls activeDot={{ r: 8 }} />
+                    </LineChart>
+                </ResponsiveContainer>
             </Box>
             <Box mt={3}>
                 <Typography variant="h5" gutterBottom>
                     Game Information
                 </Typography>
-                <Typography variant="body1">
-                    Starting balance: {balance.toFixed(2)} €
+                <Typography variant='h6'>
                     <br />
-                    Current number of shares: {shares}
-                    <br />
-                    Current commission: {commission.toFixed(2)} €
+                    Market situation {marketSituation()}
                     <br />
                 </Typography>
-                <Box sx={{ mt: 3 }}>
-                    <Button variant="contained" color="primary" onClick={() => buyStocks(10)}>
-                        Buy 10 shares for {data[0].bidPrice.toFixed(2)} € each
-                    </Button>
-                    <Button variant="contained" color="primary" sx={{ ml: 2 }} onClick={() => sellStocks(10)}>
-                        Sell 10 shares for {data[0].askPrice.toFixed(2)} € each
-                    </Button>
-                </Box>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="body1">
+                            Starting balance: {balance.toFixed(2)} €
+                            <br />
+                            Current number of shares: {shares}
+                            <br />
+                            Current commission: {commission.toFixed(2)} €
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="body1">
+                            Current bid price: {currentBid.toFixed(2)} €
+                            <br />
+                            Current ask price: {currentAsk.toFixed(2)} €
+                        </Typography>
+                    </Grid>
+                </Grid>
                 <Box sx={{ mt: 3 }}>
                     {gameRunning ? (
                         <>
                             <Button variant="contained" color="primary" onClick={() => buyStocks(10)}>
                                 Buy 10 shares for {data[0].bidPrice.toFixed(2)} € each
                             </Button>
-                            <Button variant="contained" color="primary" sx={{ ml: 2 }} onClick={() => sellStocks(10)}>
-                                Sell 10 shares for {data[0].askPrice.toFixed(2)} € each
-                            </Button>
+                            {sellButton}
                             <Button variant="contained" color="secondary" sx={{ ml: 2 }} onClick={endGame}>
                                 End game
                             </Button>
@@ -233,5 +213,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-

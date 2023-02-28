@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Design imports
 import Container from '@mui/material/Container';
@@ -20,12 +21,20 @@ const JUSTLETTER_REGEX = /^[A-Za-z]+$/;
 
 const Register = () => {
 
+    const navigate = useNavigate();
+
     const [success, setSuccess] = useState(false);
     const [email, setEmailValue] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [userName, setUserName] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
+    // user information
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [zipCode, setZipCode] = useState('');
+    const [address, setAddress] = useState('');
+    const [residence, setResidence] = useState('');
 
     // check if username value matches regex
     const isUserNameValid = () => {
@@ -67,10 +76,34 @@ const Register = () => {
         return ageDiff >= 18;
     };
 
+    const isAddressValid = () => {
+        return JUSTLETTER_REGEX.test(address.trim());
+    }
+
+    const isFirstnameValid = () => {
+        return JUSTLETTER_REGEX.test(firstName.trim());
+    }
+
+    const isLastNameValid = () => {
+        return JUSTLETTER_REGEX.test(lastName.trim());
+    }
+
+    const isZipCodeValid = () => {
+        ZIP_REGEX.test(zipCode.trim());
+    }
+
+    const isResidenceValid = () => {
+        JUSTLETTER_REGEX.test(residence.trim());
+    }
+
     // save username and password to local storage
     const registerUser = () => {
         localStorage.setItem('user', userName);
         localStorage.setItem('password', password);
+
+        // set succes state to true and redirect to dashboard
+        setSuccess(true);
+        navigate('/dashboard')
     };
 
 
@@ -149,6 +182,45 @@ const Register = () => {
                     InputLabelProps={{
                         shrink: true,
                     }}
+                />
+                <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="address"
+                    label="Address"
+                    type="text"
+                    id="address"
+                    value={address}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    error={!isAddressValid()}
+                    helperText={!isAddressValid() ? 'Please enter a valid address' : ''}
+                />
+                <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="residence"
+                    label="Residence"
+                    type="text"
+                    id="residence"
+                    value={residence}
+                    onChange={(e) => setResidence(e.target.value)}
+                    error={!isResidenceValid()}
+                    helperText={!isResidenceValid() ? 'Please enter a valid residence' : ''}
+                />
+                <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="zipcode"
+                    label="Zip Code"
+                    type="text"
+                    id="zipCode"
+                    value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value)}
+                    error={!isZipCodeValid()}
+                    helperText={!isZipCodeValid() ? 'Please enter a valid zip code' : ''}
                 />
                 <Button
                     type="submit"

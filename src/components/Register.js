@@ -109,7 +109,7 @@ const Register = () => {
 
     return (
         <Container component="main" maxWidth="xs">
-            <Typography component="h1" variant="h5" align='center'>
+            <Typography component="h1" variant="h3" align='center'>
                 Sign up
             </Typography>
             <Box
@@ -117,6 +117,10 @@ const Register = () => {
                 onSubmit={registerUser}
                 sx={{ mt: 1 }}
             >
+                <Typography variant='h5' color={'gray'}>
+                    <br />
+                    User information
+                </Typography>
                 <TextField
                     margin="normal"
                     required
@@ -166,6 +170,42 @@ const Register = () => {
                     onChange={(e) => setPasswordConfirmation(e.target.value)}
                     error={!doPasswordsMatch()}
                     helperText={!doPasswordsMatch() ? 'Passwords do not match' : ''}
+                />
+                <Typography variant='h5' color={'gray'}>
+                    <br />
+                    Personal information
+                </Typography>
+                <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="firstName"
+                    label="Firstname"
+                    type="text"
+                    id="firstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    error={!isFirstnameValid()}
+                    helperText={!isFirstnameValid() ? 'Please enter a valid name.' : ''}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                />
+                <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="lastName"
+                    label="Lastname"
+                    type="text"
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    error={!isLastNameValid()}
+                    helperText={!isLastNameValid() ? 'Please enter a valid name.' : ''}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
                 />
                 <TextField
                     margin="normal"

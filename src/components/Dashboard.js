@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Plot from 'react-plotly.js';
+
+//import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // import designs based on mui
 import Box from '@mui/material/Box';
@@ -65,6 +67,8 @@ const getCommission = (orderValue) => {
     const commission = Math.max(9.99, Math.min(59.99, baseCommission + percentageCommission));
     return commission.toFixed(2);
 };
+
+
 
 const Dashboard = () => {
     const [data, setData] = useState(initialData);
@@ -151,17 +155,38 @@ const Dashboard = () => {
                 <Typography variant="h4" align="center" gutterBottom>
                     Mustermann AG Stock Price
                 </Typography>
-                <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={data}>
-                        <XAxis dataKey="name" domain={['dataMin', 'dataMax']} />
-                        <YAxis />
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="bidPrice" stroke="#00a152" connectNulls activeDot={{ r: 8 }} />
-                        <Line type="monotone" dataKey="askPrice" stroke="#ffbe3d" connectNulls activeDot={{ r: 8 }} />
-                    </LineChart>
-                </ResponsiveContainer>
+                <Plot
+                    data={[
+                        {
+                            x: data.map(entry => entry.name),
+                            y: data.map(entry => entry.bidPrice),
+                            type: 'scatter',
+                            mode: 'lines+markers',
+                            name: 'Bid Price',
+                            marker: { color: '#00a152' },
+                            line: { shape: 'spline' }
+                        },
+                        {
+                            x: data.map(entry => entry.name),
+                            y: data.map(entry => entry.askPrice),
+                            type: 'scatter',
+                            mode: 'lines+markers',
+                            name: 'Ask Price',
+                            marker: { color: '#ffbe3d' },
+                            line: { shape: 'spline' }
+                        },
+                    ]}
+                    layout={{
+                        width: 800,
+                        height: 400,
+                        title: 'Stock Price',
+                        xaxis: { title: 'Time (s)' },
+                        yaxis: { title: 'Price (€)' }
+                    }}
+                    config={{
+                        animation: { frames: { duration: 1000 / 30 } }
+                    }}
+                />
             </Box>
             <Box mt={3}>
                 <Typography variant="h5" gutterBottom>

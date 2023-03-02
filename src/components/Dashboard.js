@@ -100,6 +100,8 @@ const Dashboard = () => {
     const [numSharesToBuy, setNumSharesToBuy] = useState(0);
     const [numSharesToSell, setNumSharesToSell] = useState(0);
     const [buyPrice, setBuyPrice] = useState(null);
+    const [profitLoss, setProfitLoss] = useState(null);
+
 
 
 
@@ -139,6 +141,15 @@ const Dashboard = () => {
             clearTimeout(timerId);
         };
     }, [gameDuration, tick]);
+    
+    
+    // calculate the profit/loss on every update of the stock price
+useEffect(() => {
+  const currentValue = shares * currentBid;
+  const totalCommission = commissions.reduce((acc, c) => acc + c.commission, 0);
+  const profitLoss = currentValue - totalCommission - 50000;
+  setProfitLoss(profitLoss);
+}, [shares, currentBid, commissions]);
 
     // function to buy shares based on the input value for number of shares
     const buyStocks = () => {
@@ -248,11 +259,15 @@ const Dashboard = () => {
     };
 
     const endGame = () => {
-        const profitLoss = (shares * data[0].askPrice - commissions.reduce((acc, c) => acc + c.commission, 0)).toFixed(2);
-        alert(`Game over! Your profit/loss: ${profitLoss} €`);
-        setGameRunning(false);
-        setGameOver(true);
-    };
+    const totalCommissions = commissions.reduce((acc, c) => acc + c.commission, 0);
+    const currentValue = shares * currentAsk;
+    const profitLoss = (currentValue - totalCommissions - balance).toFixed(2);
+    setProfitLoss(profitLoss);
+    alert(`Game over! Your profit/loss: ${profitLoss} €`);
+    setGameRunning(false);
+    setGameOver(true);
+};
+
 
 
 
@@ -324,6 +339,8 @@ const Dashboard = () => {
                                     </ul>
                                 </>
                             )}
+                            <br />
+                            Current profit/loss: {profitLoss.toFixed(2)} €
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>

@@ -32,7 +32,7 @@ const Navigation = () => {
         <AppBar position="static">
             <Toolbar>
                 <Box display="flex" alignItems="center">
-                    <Typography variant="h6">My App</Typography>
+                    <Typography variant="h6">Stock Demo Game</Typography>
                 </Box>
                 <Box display="flex" alignItems="center" marginLeft="auto">
                     <Button color="inherit" component={Link} to="/">

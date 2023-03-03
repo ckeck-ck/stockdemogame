@@ -20,7 +20,7 @@ function Dashboard() {
   const [spread, setSpread] = useState(1);
   const [gameMoney, setGameMoney] = useState(50000);
   const [stockHoldings, setStockHoldings] = useState(0);
-  const [currentTrend, setCurrentTrend] = useState("neutral");
+  const [currentTrend, setCurrentTrend] = useState("Neutral");
   const [profitLoss, setProfitLoss] = useState(0);
   const [askPrice, setAskPrice] = useState(0);
   const [bidPrice, setBidPrice] = useState(0);
@@ -33,7 +33,7 @@ function Dashboard() {
   const [initialPrice, setInitialPrice] = useState(100);
   const [initialAskPrice, setInitialAskPrice] = useState(100);
   const [initialBidPrice, setInitialBidPrice] = useState(99);
-  const [initialTrend, setInitialTrend] = useState("neutral");
+  const [initialTrend, setInitialTrend] = useState("Neutral");
   const [sellOrder, setSellOrder] = useState(0);
   const [buyOrder, setBuyOrder] = useState(0);
   const [finalProfitLoss, setFinalProfitLoss] = useState(0);
@@ -58,20 +58,20 @@ function Dashboard() {
     },
     xAxis: {
       title: {
-        text: "Time (minutes)",
+        text: "Zeit (Minuten)",
       },
       min: 0,
       max: 10,
       tickInterval: 1,
       labels: {
         formatter: function () {
-          return this.value + "m";
+          return this.value + "min";
         },
       },
     },
     yAxis: {
       title: {
-        text: "Price",
+        text: "Preis",
       },
       labels: {
         formatter: function () {
@@ -99,12 +99,12 @@ function Dashboard() {
     },
     series: [
       {
-        name: "Bid Price",
+        name: "Briefkurs",
         data: stockData.map((d) => [d.time / 60, d.price]),
         color: "#00bfff",
       },
       {
-        name: "Ask Price",
+        name: "Geldkurs",
         data: stockData.map((d) => [d.time / 60, d.askPrice]),
         color: "#000000",
       },
@@ -136,11 +136,11 @@ function Dashboard() {
     const previousPrice = lastThreePrices[1];
     const priceBeforeThat = lastThreePrices[0];
     if (currentPrice < previousPrice && previousPrice < priceBeforeThat) {
-      setCurrentTrend("bearish");
+      setCurrentTrend("Bärenmarkt");
     } else if (currentPrice > previousPrice && previousPrice > priceBeforeThat) {
-      setCurrentTrend("bullish");
+      setCurrentTrend("Bullenmarkt");
     } else {
-      setCurrentTrend("neutral");
+      setCurrentTrend("Neutral");
     }
   }, [spread, stockData])
 
@@ -164,11 +164,11 @@ function Dashboard() {
 
       // update current trend
       if (newPrice > stockData[stockData.length - 1].price) {
-        setCurrentTrend("bullish");
+        setCurrentTrend("Bullenmarkt");
       } else if (newPrice < stockData[stockData.length - 1].price) {
-        setCurrentTrend("bearish");
+        setCurrentTrend("Bärenmarkt");
       } else {
-        setCurrentTrend("neutral");
+        setCurrentTrend("Neutral");
       }
 
       // update bid and ask prices
@@ -241,11 +241,11 @@ function Dashboard() {
 
           // update current trend
           if (newPrice > stockData[stockData.length - 1].price) {
-            setCurrentTrend("bullish");
+            setCurrentTrend("Bullenmarkt");
           } else if (newPrice < stockData[stockData.length - 1].price) {
-            setCurrentTrend("bearish");
+            setCurrentTrend("Bärenmarkt");
           } else {
-            setCurrentTrend("neutral");
+            setCurrentTrend("Neutral");
           }
 
           // add new data point to time series
@@ -366,33 +366,33 @@ function Dashboard() {
     <Container maxWidth="md">
       <Box mt={3}>
         <Typography variant="h4" align="center" >
-          Mustermann AG Stock Price
+          Mustermann AG Aktien Preis
         </Typography>
         <HighchartsReact highcharts={Highcharts} options={chartOptions} ref={chartRef} />
       </Box>
       <Box mt={3}>
-        <Typography variant="h6" align="center">Game Time</Typography>
+        <Typography variant="h6" align="center">Verbleibende Zeit</Typography>
         <Typography align="center">{`${Math.floor(gameTime / 60).toString().padStart(2, "0")}:${(gameTime % 60).toString().padStart(2, "0")}`}</Typography>
         <Divider />
       </Box>
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
           <Paper style={{ display: "block" }}>
-            <Typography variant="h6">Game Money</Typography>
+            <Typography variant="h6">Kontostand</Typography>
             <Typography>€{gameMoney.toFixed(2)}</Typography>
-            <Typography variant="h6">Current Holdings</Typography>
-            <Typography>{stockHoldings} shares</Typography>
+            <Typography variant="h6">Depot</Typography>
+            <Typography>{stockHoldings} Aktien</Typography>
             <Divider />
-            <Typography variant="h6">Current Prices</Typography>
+            <Typography variant="h6">Aktuelle Preise</Typography>
             <Grid container spacing={1}>
               <Grid item xs={6}>
-                <Typography>Bid Price:</Typography>
+                <Typography>Geldkurs:</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography align="right">€{bidPrice.toFixed(2)}</Typography>
               </Grid>
               <Grid item xs={6}>
-                <Typography>Ask Price:</Typography>
+                <Typography>Briefkurs:</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography align="right">€{askPrice.toFixed(2)}</Typography>
@@ -400,19 +400,19 @@ function Dashboard() {
             </Grid>
             <Divider />
             <Divider />
-            <Typography variant="h6">Current Trend</Typography>
+            <Typography variant="h6">Aktuelle Marktsituation</Typography>
             <Typography>{currentTrend}</Typography>
             <Divider />
             {gameRunning ? (
               <>
-                <Typography variant="h6">Profit/Loss</Typography>
+                <Typography variant="h6">Gewinn/Verlust</Typography>
                 <Typography style={{ color: gameMoney < 50000 ? "red" : "green" }}>
                   €{(stockHoldings * (bidPrice - spread) - gameMoney).toFixed(2)}
                 </Typography>
               </>
             ) : (
               <>
-                <Typography variant="h6">Final Profit/Loss</Typography>
+                <Typography variant="h6">Abschliessender Gewinn / Verlust</Typography>
                 <Typography>€{finalProfitLoss.toFixed(2)}</Typography>
               </>
             )}
@@ -425,16 +425,16 @@ function Dashboard() {
           <Paper>
             <form onSubmit={handleBuy}>
               <FormControl fullWidth>
-                <InputLabel htmlFor="buy-input">Buy</InputLabel>
+                <InputLabel htmlFor="buy-input">Kaufen</InputLabel>
                 <Input id="buy-input" type="number" inputProps={{ min: "0" }} max={Math.floor(gameMoney / stockData[stockData.length - 1].price)} inputRef={buyInputRef} />
               </FormControl>
-              <Button type="submit" variant="contained" color="primary" fullWidth>Buy shares for {buyOrder.toFixed(2)}€</Button>
+              <Button type="submit" variant="contained" color="primary" fullWidth>Kaufe Aktien für: {buyOrder.toFixed(2)}€</Button>
             </form>
           </Paper>
           <Paper>
             <form onSubmit={handleSell}>
               <FormControl fullWidth>
-                <InputLabel htmlFor="sell-input">Sell</InputLabel>
+                <InputLabel htmlFor="sell-input">Verkaufen</InputLabel>
                 <Input
                   id="sell-input"
                   type="number"
@@ -450,15 +450,15 @@ function Dashboard() {
                 color="primary"
                 fullWidth
               >
-                Sell shares for {sellOrder.toFixed(2)}€
+                Aktien verkaufen für: {sellOrder.toFixed(2)}€
               </Button>
             </form>
           </Paper>
         </Grid>
       </Grid>
       <Paper>
-        <Button type="button" variant="contained" color="primary" onClick={handleStartGame} fullWidth>Start Game</Button>
-        <Button type="button" variant="contained" color="secondary" onClick={handleStopGame} fullWidth>Stop Game</Button>
+        <Button type="button" variant="contained" color="primary" onClick={handleStartGame} fullWidth>Spiel starten</Button>
+        <Button type="button" variant="contained" color="secondary" onClick={handleStopGame} fullWidth>Spiel beenden</Button>
       </Paper>
       {gameOver && <Typography variant="h3" align="center">Game Over</Typography>}
     </Container>

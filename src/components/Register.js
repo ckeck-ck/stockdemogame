@@ -132,7 +132,7 @@ const Register = () => {
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     error={!isUserNameValid()}
-                    helperText={!isUserNameValid() ? 'Please enter a valid username' : ''}
+                    helperText={!isUserNameValid() ? 'Bitte geben Sie einen Benutzernamen ein' : ''}
                 />
                 <TextField
                     margin="normal"
@@ -145,7 +145,7 @@ const Register = () => {
                     value={email}
                     onChange={(e) => setEmailValue(e.target.value)}
                     error={!isEmailValid()}
-                    helperText={!isEmailValid() ? 'Please enter a valid email address' : ''}
+                    helperText={!isEmailValid() ? 'Bitte geben Sie eine E-Mail Adresse ein.' : ''}
                 />
                 <TextField
                     margin="normal"
@@ -157,7 +157,7 @@ const Register = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     error={!isPasswordValid()}
-                    helperText={!isPasswordValid() ? 'Password must contain at least 1 lowercase, 1 uppercase, 1 number, 1 special character, and be between 8 and 24 characters long' : ''}
+                    helperText={!isPasswordValid() ? 'Das Passwort muss mindestens einen Kleinbuchstaben, einen Großbuchstaben, eine Nummer und ein Sonderzeichen beinhalten. Passwortlänge 8-24 Zeichen' : ''}
                 />
                 <TextField
                     margin='normal'
@@ -169,24 +169,24 @@ const Register = () => {
                     value={passwordConfirmation}
                     onChange={(e) => setPasswordConfirmation(e.target.value)}
                     error={!doPasswordsMatch()}
-                    helperText={!doPasswordsMatch() ? 'Passwords do not match' : ''}
+                    helperText={!doPasswordsMatch() ? 'Passwörter stimmen nicht überein' : ''}
                 />
                 <Typography variant='h5' color={'gray'}>
                     <br />
-                    Personal information
+                    Persönliche informationen
                 </Typography>
                 <TextField
                     margin="normal"
                     required
                     fullWidth
                     name="firstName"
-                    label="Firstname"
+                    label="Vorname"
                     type="text"
                     id="firstName"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     error={!isFirstnameValid()}
-                    helperText={!isFirstnameValid() ? 'Please enter a valid name.' : ''}
+                    helperText={!isFirstnameValid() ? 'Bitte geben Sie einen Namen ein' : ''}
                     InputLabelProps={{
                         shrink: true,
                     }}
@@ -196,13 +196,13 @@ const Register = () => {
                     required
                     fullWidth
                     name="lastName"
-                    label="Lastname"
+                    label="Nachname"
                     type="text"
                     id="lastName"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     error={!isLastNameValid()}
-                    helperText={!isLastNameValid() ? 'Please enter a valid name.' : ''}
+                    helperText={!isLastNameValid() ? 'Bitte geben Sie einen Namen ein.' : ''}
                     InputLabelProps={{
                         shrink: true,
                     }}
@@ -212,7 +212,7 @@ const Register = () => {
                     required
                     fullWidth
                     name="date of birth"
-                    label="Date of Birth"
+                    label="Geburtsdatum"
                     type="date"
                     id="date-of-birth"
                     value={dateOfBirth}
@@ -228,7 +228,7 @@ const Register = () => {
                     required
                     fullWidth
                     name="address"
-                    label="Address"
+                    label="Adresse"
                     type="text"
                     id="address"
                     value={address}
@@ -241,7 +241,7 @@ const Register = () => {
                     required
                     fullWidth
                     name="residence"
-                    label="Residence"
+                    label="Anschrift"
                     type="text"
                     id="residence"
                     value={residence}
@@ -254,7 +254,7 @@ const Register = () => {
                     required
                     fullWidth
                     name="zipcode"
-                    label="Zip Code"
+                    label="Postleitzahl"
                     type="text"
                     id="zipCode"
                     value={zipCode}
@@ -269,7 +269,7 @@ const Register = () => {
                     fullWidth
                     sx={{ mt: 3, mb: 2 }}
                 >
-                    Register
+                    Registrieren
                 </Button>
             </Box>
         </Container>

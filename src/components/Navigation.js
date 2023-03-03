@@ -32,14 +32,14 @@ const Navigation = () => {
         <AppBar position="static">
             <Toolbar>
                 <Box display="flex" alignItems="center">
-                    <Typography variant="h6">Stock Demo Game</Typography>
+                    <Typography variant="h6">Aktienspiel</Typography>
                 </Box>
                 <Box display="flex" alignItems="center" marginLeft="auto">
                     <Button color="inherit" component={Link} to="/">
                         Home
                     </Button>
                     <Button color="inherit" component={Link} to="/register">
-                        Register
+                        Registrieren
                     </Button>
                 </Box>
                 {loggedIn ? (

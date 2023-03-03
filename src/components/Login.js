@@ -35,7 +35,7 @@ const Login = () => {
     return (
         <Container component="main" maxWidth="xs">
             <Typography component="h1" variant="h6" align='center'>
-                Login to your account:
+                Anmelden:
             </Typography>
             <Box
                 component="form"
@@ -59,16 +59,16 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-                {loginError && <Typography color="error">Invalid Username or password.</Typography>}
+                {loginError && <Typography color="error">Falsche Benutzername oder Passwort.</Typography>}
                 <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                     <Button variant="contained" color="primary" type="submit">
                         Login
                     </Button>
                 </Box>
                 <Typography variant="body2" color="textSecondary" align="center">
-                    Don't have an account?{' '}
+                    Sie haben noch keinen Account?{' '}
                     <Link to="/register">
-                        Sign up
+                        Registrieren
                     </Link>
                 </Typography>
             </Box>

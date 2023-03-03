@@ -31,9 +31,13 @@ function Dashboard() {
   const [gameOver, setGameOver] = useState(false);
   const [gameRunning, setGameRunning] = useState(false);
   const [initialPrice, setInitialPrice] = useState(100);
-  const [initialAskPrice, setInitialAskPrice] = useState(101);
+  const [initialAskPrice, setInitialAskPrice] = useState(100);
   const [initialBidPrice, setInitialBidPrice] = useState(99);
   const [initialTrend, setInitialTrend] = useState("neutral");
+  const [sellOrder, setSellOrder] = useState(0);
+  const [buyOrder, setBuyOrder] = useState(0);
+  const [finalProfitLoss, setFinalProfitLoss] = useState(0);
+
 
   // input refs
   const buyInputRef = useRef(null);
@@ -47,6 +51,7 @@ function Dashboard() {
     chart: {
       type: "line",
       height: 200,
+      zoomType: "x",
     },
     title: {
       text: null,
@@ -101,10 +106,21 @@ function Dashboard() {
       {
         name: "Ask Price",
         data: stockData.map((d) => [d.time / 60, d.askPrice]),
-        color: "#ff4500",
+        color: "#000000",
       },
     ],
+    exporting: {
+      buttons: {
+        zoom: {
+          text: "Reset Zoom",
+          onclick: function () {
+            this.zoomOut();
+          },
+        },
+      },
+    },
   };
+
 
 
   useEffect(() => {
@@ -248,11 +264,16 @@ function Dashboard() {
     setStockData([{ time: 0, price: 100 }]);
     setGameMoney(50000);
     setStockHoldings(0);
-    setProfitLoss(0);
+    const totalCost = stockData[0].price * stockHoldings;
+    const currentValue = (bidPrice - spread) * stockHoldings;
+    const profitLoss = currentValue - totalCost;
+    setProfitLoss(profitLoss);
     setBidPrice(initialBidPrice);
     setAskPrice(initialAskPrice);
     setCurrentTrend(initialTrend);
   };
+
+
 
   // Buy stocks and update game data
   const handleBuy = (e) => {
@@ -288,6 +309,7 @@ function Dashboard() {
 
 
 
+
   return (
     <Container maxWidth="md">
       <Box mt={3}>
@@ -296,48 +318,82 @@ function Dashboard() {
         </Typography>
         <HighchartsReact highcharts={Highcharts} options={chartOptions} ref={chartRef} />
       </Box>
-      <Grid item xs={12} md={4}>
-        <Paper style={{ display: "block" }}>
-          <Typography variant="h6" align="center">Game Time</Typography>
-          <Typography align="center">{`${Math.floor(gameTime / 60).toString().padStart(2, "0")}:${(gameTime % 60).toString().padStart(2, "0")}`}</Typography>
-          <Divider />
-          <Typography variant="h6">Game Money</Typography>
-          <Typography>€{gameMoney.toFixed(2)}</Typography>
-          <Divider />
-          <Typography variant="h6">Current Prices</Typography>
-          <Typography>Bid Price: €{bidPrice.toFixed(2)}</Typography>
-          <Typography>Ask Price: €{askPrice.toFixed(2)}</Typography>
-          <Divider />
-          <Typography variant="h6">Current Trend</Typography>
-          <Typography>{currentTrend}</Typography>
-          <Typography variant="h6">Profit/Loss</Typography>
-          <Typography>€{((askPrice - spread) * stockHoldings).toFixed(2)}</Typography>
-        </Paper>
-        <Paper>
-          <form onSubmit={handleBuy}>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="buy-input">Buy</InputLabel>
-              <Input id="buy-input" type="number" min="0" max={Math.floor(gameMoney / stockData[stockData.length - 1].price)} inputRef={buyInputRef} />
-            </FormControl>
-            <Button type="submit" variant="contained" color="primary" fullWidth>Buy</Button>
-          </form>
-        </Paper>
-        <Paper>
-          <form onSubmit={handleSell}>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="sell-input">Sell</InputLabel>
-              <Input id="sell-input" type="number" min="0" max={stockHoldings} inputRef={sellInputRef} />
-            </FormControl>
-            <Button type="submit" variant="contained" color="primary" fullWidth>Sell</Button>
-          </form>
-        </Paper>
-        <Paper>
-          <Button type="button" variant="contained" color="primary" onClick={handleStartGame} fullWidth>Start Game</Button>
-          <Button type="button" variant="contained" color="secondary" onClick={handleStopGame} fullWidth>Stop Game</Button>
-        </Paper>
+      <Box mt={3}>
+        <Typography variant="h6" align="center">Game Time</Typography>
+        <Typography align="center">{`${Math.floor(gameTime / 60).toString().padStart(2, "0")}:${(gameTime % 60).toString().padStart(2, "0")}`}</Typography>
+        <Divider />
+      </Box>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={4}>
+          <Paper style={{ display: "block" }}>
+            <Typography variant="h6">Game Money</Typography>
+            <Typography>€{gameMoney.toFixed(2)}</Typography>
+            <Typography variant="h6">Current Holdings</Typography>
+            <Typography>{stockHoldings} shares</Typography>
+            <Divider />
+            <Typography variant="h6">Current Prices</Typography>
+            <Grid container spacing={1}>
+              <Grid item xs={6}>
+                <Typography>Bid Price:</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography align="right">€{bidPrice.toFixed(2)}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography>Ask Price:</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography align="right">€{askPrice.toFixed(2)}</Typography>
+              </Grid>
+            </Grid>
+            <Divider />
+            <Divider />
+            <Typography variant="h6">Current Trend</Typography>
+            <Typography>{currentTrend}</Typography>
+            <Divider />
+            {gameRunning ? (
+              <>
+                <Typography variant="h6">Profit/Loss</Typography>
+                <Typography style={{ color: gameMoney < 50000 ? "red" : "green" }}>
+                  €{(stockHoldings * (bidPrice - spread) - gameMoney).toFixed(2)}
+                </Typography>
+              </>
+            ) : (
+              <>
+                <Typography variant="h6">Final Profit/Loss</Typography>
+                <Typography>€{finalProfitLoss.toFixed(2)}</Typography>
+              </>
+            )}
+
+
+          </Paper>
+        </Grid>
+        <br />
+        <Grid item xs={12} md={8}>
+          <Paper>
+            <form onSubmit={handleBuy}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="buy-input">Buy</InputLabel>
+                <Input id="buy-input" type="number" min="0" max={Math.floor(gameMoney / stockData[stockData.length - 1].price)} inputRef={buyInputRef} />
+              </FormControl>
+              <Button type="submit" variant="contained" color="primary" fullWidth>Buy shares for {buyOrder.toFixed(2)}€</Button>
+            </form>
+          </Paper>
+          <Paper>
+            <form onSubmit={handleSell}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="sell-input">Sell</InputLabel>
+                <Input id="sell-input" type="number" min="0" max={stockHoldings} inputRef={sellInputRef} />
+              </FormControl>
+              <Button type="submit" variant="contained" color="primary" fullWidth>Sell shares for {sellOrder.toFixed(2)}€</Button>
+            </form>
+          </Paper>
+        </Grid>
       </Grid>
-
-
+      <Paper>
+        <Button type="button" variant="contained" color="primary" onClick={handleStartGame} fullWidth>Start Game</Button>
+        <Button type="button" variant="contained" color="secondary" onClick={handleStopGame} fullWidth>Stop Game</Button>
+      </Paper>
       {gameOver && <Typography variant="h3" align="center">Game Over</Typography>}
     </Container>
   );

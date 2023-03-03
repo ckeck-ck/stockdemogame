@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // import mui for styling
 import Container from '@mui/material/Container';
@@ -60,9 +60,17 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
                 {loginError && <Typography color="error">Invalid Username or password.</Typography>}
-                <Button variant="contained" color="primary" type="submit">
-                    Login
-                </Button>
+                <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <Button variant="contained" color="primary" type="submit">
+                        Login
+                    </Button>
+                </Box>
+                <Typography variant="body2" color="textSecondary" align="center">
+                    Don't have an account?{' '}
+                    <Link to="/register">
+                        Sign up
+                    </Link>
+                </Typography>
             </Box>
         </Container>
     );

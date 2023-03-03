@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import {
@@ -123,6 +123,28 @@ function Dashboard() {
 
 
 
+  const handlePriceChange = useCallback((newPrice) => {
+    setStockData((prevData) => [...prevData, { time: prevData.length, price: newPrice, askPrice: newPrice + spread },]);
+
+    // update bid and ask prices
+    setBidPrice(newPrice);
+    setAskPrice(newPrice + spread);
+
+    // check if price has increased or decreased three times in a row
+    const lastThreePrices = stockData.slice(-3).map(data => data.price);
+    const currentPrice = lastThreePrices[2];
+    const previousPrice = lastThreePrices[1];
+    const priceBeforeThat = lastThreePrices[0];
+    if (currentPrice < previousPrice && previousPrice < priceBeforeThat) {
+      setCurrentTrend("bearish");
+    } else if (currentPrice > previousPrice && previousPrice > priceBeforeThat) {
+      setCurrentTrend("bullish");
+    } else {
+      setCurrentTrend("neutral");
+    }
+  }, [spread, stockData])
+
+
   useEffect(() => {
     if (!gameRunning) {
       setBidPrice(initialBidPrice);
@@ -154,10 +176,7 @@ function Dashboard() {
       setAskPrice(askPrice);
 
       // add new data point to time series
-      setStockData((prevData) => [
-        ...prevData,
-        { time: prevData.length, price: newPrice, askPrice: askPrice },
-      ]);
+      setStockData((prevData) => [...prevData, { time: prevData.length, price: newPrice, askPrice: askPrice },]);
 
       // update game time and end game if time is up
       setGameTime((prevTime) => {
@@ -170,6 +189,10 @@ function Dashboard() {
         }
         return prevTime - 1;
       });
+
+      // update profit/loss
+      handlePriceChange(newPrice - spread);
+
     }, 1000);
 
     // stop game after 10 minutes
@@ -180,15 +203,9 @@ function Dashboard() {
     }, 10 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [
-    stockData,
-    spread,
-    timer,
-    gameRunning,
-    initialBidPrice,
-    initialAskPrice,
-    initialTrend,
-  ]);
+  }, [stockData, spread, timer, gameRunning, initialBidPrice, initialAskPrice, initialTrend, handlePriceChange,]);
+
+
 
   // update of prices when data is updated:
   useEffect(() => {
@@ -201,6 +218,8 @@ function Dashboard() {
 
 
 
+
+  // function to start game, setting timer and stock data to initial values.
   const handleStartGame = () => {
     if (!gameRunning) {
       setGameOver(false);
@@ -291,10 +310,30 @@ function Dashboard() {
     }
   };
 
+  // update buyOrder when buyInputRef changes
+  useEffect(() => {
+    if (buyInputRef.current) {
+      const numShares = parseInt(buyInputRef.current.value, 10);
+      if (numShares <= 0) {
+        return;
+      }
+      const orderValue = stockData[stockData.length - 1].price * numShares;
+      const commission = Math.max(
+        9.99,
+        Math.min(59.99, 0.0025 * orderValue + 4.95)
+      );
+      const totalCost = orderValue + commission;
+      setBuyOrder(totalCost);
+    }
+  }, [stockData]);
+
   // Sell stocks and update game data
   const handleSell = (e) => {
     e.preventDefault();
     const numShares = parseInt(sellInputRef.current.value, 10);
+    if (numShares <= 0) {
+      return;
+    }
     const orderValue = stockData[stockData.length - 1].price * numShares;
     const commission = Math.max(
       9.99,
@@ -304,8 +343,21 @@ function Dashboard() {
     if (numShares <= stockHoldings) {
       setStockHoldings((prevHoldings) => prevHoldings - numShares);
       setGameMoney((prevMoney) => prevMoney + totalProceeds);
+      setSellOrder(0);
     }
   };
+
+  const handleSellInputChange = (e) => {
+    const numShares = parseInt(e.target.value, 10);
+    const orderValue = stockData[stockData.length - 1].price * numShares;
+    const commission = Math.max(
+      9.99,
+      Math.min(59.99, 0.0025 * orderValue + 4.95)
+    );
+    const totalProceeds = orderValue - commission;
+    setSellOrder(totalProceeds);
+  };
+
 
 
 
@@ -374,7 +426,7 @@ function Dashboard() {
             <form onSubmit={handleBuy}>
               <FormControl fullWidth>
                 <InputLabel htmlFor="buy-input">Buy</InputLabel>
-                <Input id="buy-input" type="number" min="0" max={Math.floor(gameMoney / stockData[stockData.length - 1].price)} inputRef={buyInputRef} />
+                <Input id="buy-input" type="number" inputProps={{ min: "0" }} max={Math.floor(gameMoney / stockData[stockData.length - 1].price)} inputRef={buyInputRef} />
               </FormControl>
               <Button type="submit" variant="contained" color="primary" fullWidth>Buy shares for {buyOrder.toFixed(2)}€</Button>
             </form>
@@ -383,9 +435,23 @@ function Dashboard() {
             <form onSubmit={handleSell}>
               <FormControl fullWidth>
                 <InputLabel htmlFor="sell-input">Sell</InputLabel>
-                <Input id="sell-input" type="number" min="0" max={stockHoldings} inputRef={sellInputRef} />
+                <Input
+                  id="sell-input"
+                  type="number"
+                  inputProps={{ min: "0" }}
+                  max={stockHoldings}
+                  inputRef={sellInputRef}
+                  onChange={handleSellInputChange}
+                />
               </FormControl>
-              <Button type="submit" variant="contained" color="primary" fullWidth>Sell shares for {sellOrder.toFixed(2)}€</Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+              >
+                Sell shares for {sellOrder.toFixed(2)}€
+              </Button>
             </form>
           </Paper>
         </Grid>

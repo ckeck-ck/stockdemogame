@@ -407,7 +407,7 @@ function Dashboard() {
               <>
                 <Typography variant="h6">Gewinn/Verlust</Typography>
                 <Typography style={{ color: gameMoney < 50000 ? "red" : "green" }}>
-                  €{(stockHoldings * (bidPrice - spread) - gameMoney).toFixed(2)}
+                  {(50000 - gameMoney).toFixed(2)}€
                 </Typography>
               </>
             ) : (
@@ -426,9 +426,16 @@ function Dashboard() {
             <form onSubmit={handleBuy}>
               <FormControl fullWidth>
                 <InputLabel htmlFor="buy-input">Kaufen</InputLabel>
-                <Input id="buy-input" type="number" inputProps={{ min: "0" }} max={Math.floor(gameMoney / stockData[stockData.length - 1].price)} inputRef={buyInputRef} />
+                <Input
+                  id="buy-input"
+                  type="number"
+                  inputProps={{ min: "0" }}
+                  max={Math.floor(gameMoney / stockData[stockData.length - 1].price)}
+                  inputRef={buyInputRef}
+                  disabled={!gameRunning}
+                />
               </FormControl>
-              <Button type="submit" variant="contained" color="primary" fullWidth>Kaufe Aktien für: {buyOrder.toFixed(2)}€</Button>
+              <Button type="submit" variant="contained" color="primary" disabled={!gameRunning} fullWidth>Kaufe Aktien für: {buyOrder.toFixed(2)}€</Button>
             </form>
           </Paper>
           <Paper>
@@ -442,12 +449,14 @@ function Dashboard() {
                   max={stockHoldings}
                   inputRef={sellInputRef}
                   onChange={handleSellInputChange}
+                  disabled={!gameRunning}
                 />
               </FormControl>
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
+                disabled={!gameRunning}
                 fullWidth
               >
                 Aktien verkaufen für: {sellOrder.toFixed(2)}€
@@ -458,7 +467,7 @@ function Dashboard() {
       </Grid>
       <Paper>
         <Button type="button" variant="contained" color="primary" onClick={handleStartGame} fullWidth>Spiel starten</Button>
-        <Button type="button" variant="contained" color="secondary" onClick={handleStopGame} fullWidth>Spiel beenden</Button>
+        <Button type="button" variant="contained" color="secondary" onClick={handleStopGame} disabled={!gameRunning} fullWidth>Spiel beenden</Button>
       </Paper>
       {gameOver && <Typography variant="h3" align="center">Game Over</Typography>}
     </Container>
